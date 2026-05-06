@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>TruthBox — Speak Freely</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,800;1,9..144,400&family=Outfit:wght@300;400;500;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+/* ═══════════════════════════════════════
+   RESET & ROOT
+═══════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:        #0d0f14;
+  --bg2:       #13161e;
+  --bg3:       #191d28;
+  --surface:   #1e2230;
+  --surface2:  #252a3a;
+  --gold:      #c9a84c;
+  --gold2:     #e8c97a;
+  --gold-dim:  rgba(201,168,76,0.15);
+  --gold-glow: rgba(201,168,76,0.08);
+  --text:      #e8e4dc;
+  --text2:     #a8a49c;
+  --text3:     #6a6660;
+  --border:    rgba(201,168,76,0.14);
+  --border2:   rgba(201,168,76,0.24);
+  --red:       #e05252;
+  --red-dim:   rgba(224,82,82,0.15);
+  --green:     #52b788;
+  --green-dim: rgba(82,183,136,0.15);
+  --blue:      #5b8dee;
+  --blue-dim:  rgba(91,141,238,0.12);
+  --radius:    10px;
+  --serif:     'Fraunces', Georgia, serif;
+  --body:      'Outfit', system-ui, sans-serif;
+  --mono:      'Fira Code', monospace;
+  --shadow:    0 4px 24px rgba(0,0,0,0.4);
+  --shadow-sm: 0 2px 10px rgba(0,0,0,0.25);
+  --transition: 0.18s cubic-bezier(0.4,0,0.2,1);
+}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--body);
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* Subtle grid background */
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(201,168,76,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201,168,76,0.025) 1px, transparent 1px);
+  background-size:48px 48px;
+  pointer-events:none;z-index:0;
+}
+
+/* ═══════════════════════════════════════
+   SCROLLBAR
+═══════════════════════════════════════ */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--surface2);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--gold)}
+
+/* ═══════════════════════════════════════
+   USERNAME MODAL
+═══════════════════════════════════════ */
+#usernameModal{
+  position:fixed;inset:0;
+  background:rgba(13,15,20,0.92);
+  backdrop-filter:blur(16px);
+  display:flex;align-items:center;justify-content:center;
+  z-index:1000;
+  animation:fadeIn 0.3s ease;
+}
+#usernameModal.hidden{display:none}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+.modal-box{
+  background:var(--bg2);
+  border:1px solid var(--border2);
+  border-radius:20px;
+  padding:3rem 2.5rem;
+  max-width:460px;width:90%;
+  text-align:center;
+  box-shadow:0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(201,168,76,0.08);
+  animation:slideUp 0.35s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes slideUp{from{opacity:0;transform:translateY(30px) scale(0.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+.modal-icon{
+  font-size:2.5rem;margin-bottom:1rem;
+  display:block;
+}
+.modal-box h2{
+  font-family:var(--serif);
+  font-size:1.75rem;font-weight:800;
+  color:var(--text);
+  letter-spacing:-0.03em;
+  margin-bottom:0.5rem;
+}
+.modal-box p{
+  font-size:0.875rem;color:var(--text2);
+  line-height:1.6;margin-bottom:2rem;
+}
+.modal-box p strong{color:var(--gold)}
+
+.modal-input{
+  font-family:var(--body);
+  font-size:1rem;
+  color:var(--text);
+  background:var(--bg3);
+  border:1.5px solid var(--border2);
+  border-radius:10px;
+  padding:0.85rem 1.1rem;
+  width:100%;outline:none;
+  transition:border-color var(--transition), box-shadow var(--transition);
+  margin-bottom:1rem;
+}
+.modal-input:focus{
+  border-color:var(--gold);
+  box-shadow:0 0 0 4px var(--gold-glow);
+}
+
+.modal-btn{
+  width:100%;
+  font-family:var(--body);
+  font-size:1rem;font-weight:600;
+  color:var(--bg);
+  background:linear-gradient(135deg, var(--gold), var(--gold2));
+  border:none;border-radius:10px;
+  padding:0.9rem 1.5rem;
+  cursor:pointer;
+  transition:transform var(--transition), box-shadow var(--transition), opacity var(--transition);
+  box-shadow:0 4px 20px rgba(201,168,76,0.3);
+}
+.modal-btn:hover{transform:translateY(-1px);box-shadow:0 8px 28px rgba(201,168,76,0.4)}
+.modal-btn:active{transform:scale(0.98)}
+
+/* ═══════════════════════════════════════
+   HEADER
+═══════════════════════════════════════ */
+header{
+  background:rgba(13,15,20,0.85);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  padding:0 2rem;
+  height:68px;
+  display:flex;align-items:center;gap:1.5rem;
+  position:sticky;top:0;z-index:100;
+  flex-shrink:0;
+}
+
+.logo{
+  font-family:var(--serif);
+  font-size:1.6rem;font-weight:800;
+  letter-spacing:-0.04em;
+  color:var(--text);
+  line-height:1;
+  white-space:nowrap;
+}
+.logo span{
+  background:linear-gradient(135deg, var(--gold), var(--gold2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+
+.header-pill{
+  font-family:var(--mono);
+  font-size:0.6rem;letter-spacing:0.12em;
+  text-transform:uppercase;
+  color:var(--text3);
+  background:var(--surface);
+  border:1px solid var(--border);
+  padding:0.3rem 0.75rem;
+  border-radius:999px;
+  white-space:nowrap;
+}
+
+.header-right{
+  margin-left:auto;
+  display:flex;align-items:center;gap:0.75rem;
+}
+
+.user-badge{
+  display:flex;align-items:center;gap:0.5rem;
+  background:var(--gold-dim);
+  border:1px solid var(--border2);
+  border-radius:999px;
+  padding:0.35rem 0.9rem 0.35rem 0.5rem;
+  cursor:pointer;
+  transition:all var(--transition);
+}
+.user-badge:hover{background:rgba(201,168,76,0.22);border-color:var(--gold)}
+.user-avatar{
+  width:26px;height:26px;
+  background:linear-gradient(135deg, var(--gold), var(--gold2));
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.7rem;font-weight:700;color:var(--bg);
+  font-family:var(--body);
+  flex-shrink:0;
+}
+.user-name{
+  font-family:var(--mono);
+  font-size:0.72rem;font-weight:500;
+  color:var(--gold2);
+  letter-spacing:0.02em;
+  max-width:120px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+
+.live-badge{
+  display:flex;align-items:center;gap:0.45rem;
+  font-family:var(--mono);
+  font-size:0.65rem;color:var(--text3);
+  letter-spacing:0.04em;
+}
+.live-dot{
+  width:7px;height:7px;
+  background:var(--green);
+  border-radius:50%;
+  box-shadow:0 0 6px var(--green);
+  animation:pls 2s ease-in-out infinite;
+}
+@keyframes pls{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.8)}}
+
+/* ═══════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════ */
+.layout{
+  display:grid;
+  grid-template-columns:420px 1fr;
+  flex:1;
+  position:relative;z-index:1;
+}
+
+/* ═══════════════════════════════════════
+   COMPOSE PANEL
+═══════════════════════════════════════ */
+.compose-col{
+  background:var(--bg2);
+  border-right:1px solid var(--border);
+  position:sticky;top:68px;
+  height:calc(100vh - 68px);
+  overflow-y:auto;
+  display:flex;flex-direction:column;
+}
+.compose-inner{
+  padding:1.75rem 1.75rem 1.25rem;
+  display:flex;flex-direction:column;gap:1.1rem;
+  flex:1;
+}
+
+.compose-hd{
+  padding-bottom:1.1rem;
+  border-bottom:1px solid var(--border);
+}
+.compose-hd small{
+  display:block;
+  font-family:var(--mono);
+  font-size:0.58rem;letter-spacing:0.14em;
+  text-transform:uppercase;color:var(--gold);
+  margin-bottom:0.35rem;
+}
+.compose-hd h2{
+  font-family:var(--serif);
+  font-size:1.35rem;font-weight:800;
+  letter-spacing:-0.03em;color:var(--text);
+}
+
+/* FIELD */
+.field{display:flex;flex-direction:column;gap:0.45rem}
+.field label{
+  font-family:var(--mono);
+  font-size:0.6rem;letter-spacing:0.1em;
+  text-transform:uppercase;color:var(--text3);
+}
+.field input[type="text"]{
+  font-family:var(--body);
+  font-size:0.9rem;color:var(--text);
+  background:var(--bg3);
+  border:1.5px solid var(--border);
+  border-radius:8px;
+  padding:0.7rem 0.9rem;outline:none;
+  transition:border-color var(--transition), box-shadow var(--transition);
+}
+.field input[type="text"]:focus{
+  border-color:var(--gold);
+  box-shadow:0 0 0 3px var(--gold-glow);
+}
+
+/* TOOLBAR */
+.toolbar{
+  display:flex;flex-wrap:wrap;gap:0.35rem;
+  background:var(--bg3);
+  border:1.5px solid var(--border);
+  border-radius:8px 8px 0 0;
+  padding:0.55rem 0.65rem;
+  border-bottom:1px solid var(--border);
+}
+.tb-btn{
+  font-family:var(--mono);
+  font-size:0.72rem;font-weight:500;
+  color:var(--text2);
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:5px;
+  padding:0.3rem 0.6rem;
+  cursor:pointer;
+  transition:all var(--transition);
+  white-space:nowrap;
+  line-height:1;
+}
+.tb-btn:hover{background:var(--gold-dim);border-color:var(--border2);color:var(--gold2)}
+.tb-btn.active{background:var(--gold-dim);border-color:var(--gold);color:var(--gold2)}
+.tb-sep{width:1px;background:var(--border);margin:0 0.1rem;align-self:stretch}
+
+/* EDITOR */
+#editor{
+  font-family:var(--body);
+  font-size:0.93rem;color:var(--text);
+  background:var(--bg3);
+  border:1.5px solid var(--border);
+  border-top:none;
+  border-radius:0 0 8px 8px;
+  padding:0.85rem 0.9rem;
+  min-height:175px;
+  max-height:280px;
+  overflow-y:auto;
+  outline:none;
+  line-height:1.7;
+  transition:border-color var(--transition), box-shadow var(--transition);
+  word-break:break-word;
+}
+#editor:focus{
+  border-color:var(--gold);
+  box-shadow:0 0 0 3px var(--gold-glow);
+}
+#editor:empty::before{
+  content:attr(data-placeholder);
+  color:var(--text3);pointer-events:none;
+}
+#editor h1{font-family:var(--serif);font-size:1.35rem;font-weight:800;margin:0.3rem 0;line-height:1.3;color:var(--text)}
+#editor h2{font-family:var(--serif);font-size:1.1rem;font-weight:600;margin:0.25rem 0;line-height:1.35;color:var(--text)}
+#editor b, #editor strong{font-weight:700;color:var(--text)}
+#editor i, #editor em{font-style:italic;color:var(--text)}
+#editor u{text-decoration:underline;text-decoration-color:var(--gold)}
+#editor p{margin:0.1rem 0}
+#editor br{line-height:1.7}
+
+.editor-footer{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-top:-0.3rem;
+}
+.char-ind{
+  font-family:var(--mono);font-size:0.6rem;color:var(--text3);
+  transition:color var(--transition);
+}
+.char-ind.near{color:#c07a00}
+.char-ind.over{color:var(--red);font-weight:500}
+
+/* SUBMIT */
+.submit-btn{
+  width:100%;
+  display:flex;align-items:center;justify-content:center;gap:0.55rem;
+  font-family:var(--body);font-size:1rem;font-weight:600;
+  color:var(--bg);
+  background:linear-gradient(135deg, var(--gold) 0%, var(--gold2) 100%);
+  border:none;border-radius:10px;
+  padding:0.9rem 1.5rem;cursor:pointer;
+  transition:transform var(--transition), box-shadow var(--transition), opacity var(--transition);
+  box-shadow:0 4px 20px rgba(201,168,76,0.3);
+  letter-spacing:0.01em;
+  position:relative;overflow:hidden;
+}
+.submit-btn::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg, transparent, rgba(255,255,255,0.08));
+  opacity:0;transition:opacity var(--transition);
+}
+.submit-btn:hover{transform:translateY(-1px);box-shadow:0 8px 28px rgba(201,168,76,0.4)}
+.submit-btn:hover::before{opacity:1}
+.submit-btn:active{transform:scale(0.985)}
+.submit-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;box-shadow:none}
+.arr{font-size:1.1rem;transition:transform var(--transition)}
+.submit-btn:hover .arr{transform:translateX(4px)}
+.spin{width:17px;height:17px;border:2px solid rgba(13,15,20,0.3);border-top-color:var(--bg);border-radius:50%;animation:rot 0.7s linear infinite;display:none;flex-shrink:0}
+@keyframes rot{to{transform:rotate(360deg)}}
+.submit-btn.loading .spin{display:block}
+.submit-btn.loading .btn-lbl,.submit-btn.loading .arr{display:none}
+
+/* TOAST */
+.toast-slot{min-height:38px}
+.toast{
+  font-family:var(--mono);font-size:0.7rem;
+  padding:0.6rem 0.85rem;border-radius:7px;
+  display:none;animation:tin 0.2s ease;
+  border-left:3px solid transparent;
+}
+@keyframes tin{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.toast.ok {display:block;background:rgba(82,183,136,0.12);border-color:var(--green);color:#7dd4aa}
+.toast.err{display:block;background:var(--red-dim);border-color:var(--red);color:#f08080}
+
+/* RULES */
+.rules{
+  padding:1rem 1.75rem 1.5rem;
+  border-top:1px solid var(--border);
+  margin-top:auto;
+}
+.rules p{
+  font-family:var(--mono);font-size:0.58rem;
+  letter-spacing:0.04em;color:var(--text3);line-height:2;
+}
+.rules b{color:var(--text2);font-weight:500}
+
+/* ═══════════════════════════════════════
+   FEED
+═══════════════════════════════════════ */
+.feed-col{
+  padding:2rem 2.5rem;
+  background:var(--bg);
+}
+
+.feed-hd{
+  display:flex;align-items:center;gap:0.85rem;
+  margin-bottom:1.75rem;
+  padding-bottom:1rem;
+  border-bottom:1px solid var(--border);
+}
+.feed-hd h2{
+  font-family:var(--serif);
+  font-size:1.15rem;font-weight:800;
+  letter-spacing:-0.02em;color:var(--text);
+}
+.feed-hd h2 em{
+  font-style:normal;
+  font-family:var(--mono);
+  font-size:0.6rem;font-weight:400;
+  color:var(--text3);margin-left:0.5rem;
+  letter-spacing:0.04em;
+}
+
+.filter-row{
+  display:flex;gap:0.4rem;margin-left:auto;
+}
+.filter-btn{
+  font-family:var(--mono);font-size:0.6rem;
+  letter-spacing:0.08em;text-transform:uppercase;
+  color:var(--text3);background:none;
+  border:1px solid var(--border);
+  padding:0.28rem 0.65rem;border-radius:5px;
+  cursor:pointer;transition:all var(--transition);
+}
+.filter-btn:hover,.filter-btn.active{
+  border-color:var(--gold);color:var(--gold2);
+  background:var(--gold-dim);
+}
+
+.ref-btn{
+  font-family:var(--mono);font-size:0.6rem;
+  letter-spacing:0.08em;text-transform:uppercase;
+  color:var(--text3);background:none;
+  border:1px solid var(--border);
+  padding:0.28rem 0.65rem;border-radius:5px;
+  cursor:pointer;transition:all var(--transition);
+  display:flex;align-items:center;gap:0.3rem;
+}
+.ref-btn:hover{border-color:var(--text2);color:var(--text2)}
+.ref-btn.spinning{opacity:0.45;pointer-events:none}
+.ri{display:inline-block}
+.ref-btn.spinning .ri{animation:rot 0.6s linear infinite}
+
+#feedList{display:flex;flex-direction:column;gap:1rem}
+
+/* ═══════════════════════════════════════
+   POST CARD
+═══════════════════════════════════════ */
+.post-card{
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:1.35rem 1.5rem;
+  position:relative;
+  transition:border-color var(--transition), box-shadow var(--transition), transform var(--transition);
+  animation:cin 0.3s ease both;
+  scroll-margin-top:90px;
+}
+@keyframes cin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.post-card:hover{
+  border-color:var(--border2);
+  box-shadow:0 4px 24px rgba(0,0,0,0.35), 0 0 0 1px rgba(201,168,76,0.06);
+}
+.post-card.highlighted{
+  border-color:var(--gold) !important;
+  box-shadow:0 0 0 3px var(--gold-glow), 0 8px 32px rgba(0,0,0,0.4) !important;
+  animation:cin 0.3s ease both, glow 2s ease 0.3s forwards;
+}
+@keyframes glow{
+  0%{box-shadow:0 0 0 3px var(--gold-glow), 0 8px 32px rgba(0,0,0,0.4)}
+  100%{box-shadow:0 4px 24px rgba(0,0,0,0.35)}
+}
+
+.post-top{
+  display:flex;align-items:flex-start;gap:0.75rem;
+  margin-bottom:0.85rem;
+}
+.post-avatar{
+  width:34px;height:34px;flex-shrink:0;
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.78rem;font-weight:700;
+  font-family:var(--body);color:var(--bg);
+  background:linear-gradient(135deg, var(--gold), var(--gold2));
+}
+.post-meta-grp{flex:1;min-width:0}
+.post-user{
+  font-family:var(--mono);font-size:0.75rem;font-weight:500;
+  color:var(--gold2);letter-spacing:0.01em;
+}
+.post-user::before{content:'u/ ';opacity:0.5}
+.post-time{
+  font-family:var(--mono);font-size:0.6rem;
+  color:var(--text3);letter-spacing:0.02em;
+  margin-top:0.15rem;
+}
+
+.post-actions-top{
+  display:flex;gap:0.4rem;align-items:center;
+  flex-shrink:0;
+}
+.icon-btn{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:0.35rem 0.5rem;
+  cursor:pointer;
+  display:flex;align-items:center;gap:0.35rem;
+  transition:all var(--transition);
+  font-family:var(--mono);font-size:0.65rem;
+  color:var(--text3);
+  line-height:1;
+}
+.icon-btn:hover{background:var(--surface2);border-color:var(--border2);color:var(--text2)}
+
+.share-btn:hover{border-color:var(--blue);color:var(--blue)}
+
+/* LIKE / DISLIKE */
+.like-btn:hover{background:var(--green-dim);border-color:var(--green);color:var(--green)}
+.like-btn.voted{background:var(--green-dim);border-color:var(--green);color:var(--green)}
+.dislike-btn:hover{background:var(--red-dim);border-color:var(--red);color:var(--red)}
+.dislike-btn.voted{background:var(--red-dim);border-color:var(--red);color:var(--red)}
+
+.icon-btn svg{width:13px;height:13px;flex-shrink:0}
+
+/* POST BODY */
+.post-body{
+  font-size:0.95rem;line-height:1.8;
+  color:var(--text);word-break:break-word;
+}
+.post-body h1{
+  font-family:var(--serif);font-size:1.3rem;font-weight:800;
+  letter-spacing:-0.03em;color:var(--text);
+  margin:0.5rem 0 0.3rem;line-height:1.25;
+}
+.post-body h2{
+  font-family:var(--serif);font-size:1.05rem;font-weight:600;
+  color:var(--text);margin:0.4rem 0 0.2rem;line-height:1.3;
+}
+.post-body b,.post-body strong{font-weight:700;color:var(--text)}
+.post-body i,.post-body em{font-style:italic;color:var(--text)}
+.post-body u{text-decoration:underline;text-decoration-color:var(--gold);text-underline-offset:3px}
+.post-body p{margin:0.15rem 0}
+
+.post-footer{
+  margin-top:1rem;
+  padding-top:0.75rem;
+  border-top:1px solid var(--border);
+  display:flex;align-items:center;gap:0.5rem;
+}
+.post-id-tag{
+  font-family:var(--mono);font-size:0.58rem;
+  color:var(--text3);letter-spacing:0.05em;
+  margin-left:auto;
+}
+
+/* FEED STATES */
+.feed-state{
+  text-align:center;padding:5rem 0;
+  font-family:var(--mono);font-size:0.73rem;
+  color:var(--text3);letter-spacing:0.05em;
+}
+.dots span{animation:blink 1.2s steps(1) infinite}
+.dots span:nth-child(2){animation-delay:0.4s}
+.dots span:nth-child(3){animation-delay:0.8s}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* ═══════════════════════════════════════
+   TOAST (global)
+═══════════════════════════════════════ */
+#globalToast{
+  position:fixed;bottom:1.5rem;right:1.5rem;
+  z-index:500;
+  font-family:var(--mono);font-size:0.72rem;
+  padding:0.75rem 1.1rem;
+  border-radius:9px;
+  background:var(--surface2);
+  border:1px solid var(--border2);
+  color:var(--text);
+  box-shadow:var(--shadow);
+  transform:translateY(8px);opacity:0;
+  transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+  pointer-events:none;max-width:300px;
+}
+#globalToast.show{transform:translateY(0);opacity:1}
+#globalToast.green{border-color:var(--green);color:#7dd4aa}
+#globalToast.red{border-color:var(--red);color:#f08080}
+
+/* ═══════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════ */
+@media(max-width:900px){
+  .layout{grid-template-columns:1fr}
+  .compose-col{position:static;height:auto;border-right:none;border-bottom:1px solid var(--border)}
+  .feed-col{padding:1.5rem 1.25rem}
+  header{padding:0 1.25rem}
+  .header-pill{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ USERNAME MODAL ═══════════ -->
+<div id="usernameModal">
+  <div class="modal-box">
+    <span class="modal-icon">✦</span>
+    <h2>Who are you today?</h2>
+    <p>Pick a name — real, fake, whatever you like.<br/>This will be your <strong>permanent identity on this device</strong>. Choose wisely.</p>
+    <input class="modal-input" id="modalUsernameInput" type="text"
+      placeholder="e.g. Anonymous, RealTalk99, TheTruthTeller…"
+      maxlength="40" autocomplete="off" spellcheck="false"/>
+    <button class="modal-btn" onclick="saveUsername()">Enter TruthBox →</button>
+  </div>
+</div>
+
+<!-- ═══════════ HEADER ═══════════ -->
+<header>
+  <div class="logo">Truth<span>Box</span></div>
+  <div class="header-pill">raw · unfiltered · permanent</div>
+  <div class="header-right">
+    <div class="live-badge">
+      <div class="live-dot"></div>
+      <span id="liveCount">—</span>
+    </div>
+    <div class="user-badge" onclick="changeUsername()" title="Click to change username">
+      <div class="user-avatar" id="headerAvatar">?</div>
+      <span class="user-name" id="headerUsername">loading…</span>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════ LAYOUT ═══════════ -->
+<div class="layout">
+
+  <!-- COMPOSE -->
+  <aside class="compose-col">
+    <div class="compose-inner">
+
+      <div class="compose-hd">
+        <small>Compose</small>
+        <h2>Drop your truth</h2>
+      </div>
+
+      <!-- Rich text toolbar -->
+      <div class="field">
+        <label>Format your post</label>
+
+        <div class="toolbar" id="toolbar">
+          <button class="tb-btn" data-cmd="H1" title="Heading 1" onclick="fmtH1()">H1</button>
+          <button class="tb-btn" data-cmd="H2" title="Heading 2" onclick="fmtH2()">H2</button>
+          <div class="tb-sep"></div>
+          <button class="tb-btn" data-cmd="bold" title="Bold" onclick="fmt('bold')"><b>B</b></button>
+          <button class="tb-btn" data-cmd="italic" title="Italic" onclick="fmt('italic')"><i>I</i></button>
+          <button class="tb-btn" data-cmd="underline" title="Underline" onclick="fmt('underline')"><u>U</u></button>
+          <div class="tb-sep"></div>
+          <button class="tb-btn" title="Clear formatting" onclick="fmtClear()">✕ Clear</button>
+        </div>
+
+        <div id="editor"
+          contenteditable="true"
+          data-placeholder="No likes. No comments. No deletion. Just your words — permanent and public. Format with the toolbar above."
+          oninput="onEditorInput()"
+          onkeydown="handleEditorKey(event)">
+        </div>
+        <div class="editor-footer">
+          <span style="font-family:var(--mono);font-size:0.58rem;color:var(--text3)">Shift+Enter for new line</span>
+          <span class="char-ind" id="charCount">0 / 2000</span>
+        </div>
+      </div>
+
+      <div>
+        <button class="submit-btn" id="submitBtn" onclick="submitPost()">
+          <span class="btn-lbl">Post it</span>
+          <span class="arr">→</span>
+          <span class="spin"></span>
+        </button>
+      </div>
+
+      <div class="toast-slot">
+        <div class="toast" id="composeToast"></div>
+      </div>
+
+    </div>
+
+    <div class="rules">
+      <p>
+        <b>No accounts</b> · <b>No tracking</b> · <b>No deletion</b><br/>
+        <b>Posts are permanent &amp; public</b> · <b>1 like/dislike per device</b><br/>
+        Username locked per device · Timestamp auto-recorded
+      </p>
+    </div>
+  </aside>
+
+  <!-- FEED -->
+  <main class="feed-col">
+    <div class="feed-hd">
+      <h2>All posts <em id="postCountLabel"></em></h2>
+      <div class="filter-row">
+        <button class="filter-btn active" id="sortNew" onclick="setSort('new')">Latest</button>
+        <button class="filter-btn" id="sortTop" onclick="setSort('top')">Top</button>
+      </div>
+      <button class="ref-btn" id="refreshBtn" onclick="loadPosts()">
+        <span class="ri">↺</span> Refresh
+      </button>
+    </div>
+    <div id="feedList">
+      <div class="feed-state">
+        Loading posts<span class="dots"><span>.</span><span>.</span><span>.</span></span>
+      </div>
+    </div>
+  </main>
+
+</div>
+
+<!-- Global toast -->
+<div id="globalToast"></div>
+
+<!-- ═══════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════ -->
+<script>
+// ─── CONFIG ───────────────────────────────
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyPPz1Kp9-sqsXOFyh7TEF53cwvYcjAGDAjxsPeJFX53Ssqk5CATWJra-iZrtRFJcBb/exec';
+// ─────────────────────────────────────────
+
+// ─── STATE ───────────────────────────────
+let allPosts  = [];
+let sortMode  = 'new';
+let currentUser = '';
+// ─────────────────────────────────────────
+
+/* ══════════════════════════════════════
+   USERNAME (localStorage)
+══════════════════════════════════════ */
+function initUsername() {
+  const saved = localStorage.getItem('tb_username');
+  if (saved) {
+    currentUser = saved;
+    updateHeaderUser(saved);
+    document.getElementById('usernameModal').classList.add('hidden');
+  } else {
+    document.getElementById('usernameModal').classList.remove('hidden');
+    setTimeout(() => document.getElementById('modalUsernameInput').focus(), 300);
+  }
+}
+
+function saveUsername() {
+  const val = document.getElementById('modalUsernameInput').value.trim();
+  if (!val) { flashModal(); return; }
+  if (val.length < 2) { flashModal('At least 2 characters'); return; }
+  localStorage.setItem('tb_username', val);
+  currentUser = val;
+  updateHeaderUser(val);
+  document.getElementById('usernameModal').classList.add('hidden');
+}
+
+function flashModal(msg) {
+  const inp = document.getElementById('modalUsernameInput');
+  inp.style.borderColor = 'var(--red)';
+  inp.style.boxShadow   = '0 0 0 3px rgba(224,82,82,0.15)';
+  if (msg) inp.placeholder = msg;
+  setTimeout(() => {
+    inp.style.borderColor = '';
+    inp.style.boxShadow   = '';
+    inp.placeholder = 'e.g. Anonymous, RealTalk99…';
+  }, 1200);
+}
+
+function changeUsername() {
+  if (!confirm('Change your username? This only affects new posts — old ones keep the old name.')) return;
+  localStorage.removeItem('tb_username');
+  document.getElementById('modalUsernameInput').value = '';
+  document.getElementById('usernameModal').classList.remove('hidden');
+  setTimeout(() => document.getElementById('modalUsernameInput').focus(), 100);
+}
+
+function updateHeaderUser(name) {
+  document.getElementById('headerUsername').textContent = name;
+  document.getElementById('headerAvatar').textContent   = name.slice(0,1).toUpperCase();
+}
+
+// Enter key in modal
+document.getElementById('modalUsernameInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') saveUsername();
+});
+
+/* ══════════════════════════════════════
+   RICH TEXT EDITOR
+══════════════════════════════════════ */
+function fmt(cmd) {
+  document.execCommand(cmd, false, null);
+  document.getElementById('editor').focus();
+  updateToolbarState();
+}
+
+function fmtH1() {
+  // Wrap selection in h1 or remove if already h1
+  document.execCommand('formatBlock', false, '<h1>');
+  document.getElementById('editor').focus();
+  updateToolbarState();
+}
+
+function fmtH2() {
+  document.execCommand('formatBlock', false, '<h2>');
+  document.getElementById('editor').focus();
+  updateToolbarState();
+}
+
+function fmtClear() {
+  document.execCommand('removeFormat', false, null);
+  document.execCommand('formatBlock', false, '<p>');
+  document.getElementById('editor').focus();
+  updateToolbarState();
+}
+
+function handleEditorKey(e) {
+  // Shift+Enter = <br>, plain Enter = new paragraph (default)
+  if (e.key === 'Enter' && e.shiftKey) {
+    e.preventDefault();
+    document.execCommand('insertLineBreak');
+  }
+}
+
+function onEditorInput() {
+  const text = document.getElementById('editor').innerText || '';
+  const n = text.length;
+  const el = document.getElementById('charCount');
+  el.textContent = `${n} / 2000`;
+  el.className   = 'char-ind' + (n > 1800 ? ' over' : n > 1400 ? ' near' : '');
+  updateToolbarState();
+}
+
+function updateToolbarState() {
+  const cmds = ['bold','italic','underline'];
+  cmds.forEach(c => {
+    const btn = document.querySelector(`[data-cmd="${c}"]`);
+    if (btn) btn.classList.toggle('active', document.queryCommandState(c));
+  });
+}
+
+document.getElementById('editor').addEventListener('keyup', updateToolbarState);
+document.getElementById('editor').addEventListener('mouseup', updateToolbarState);
+
+/* ══════════════════════════════════════
+   GET EDITOR HTML (sanitised for storage)
+══════════════════════════════════════ */
+function getEditorHTML() {
+  const editor = document.getElementById('editor');
+  // Only allow safe tags
+  const allowed = ['H1','H2','P','B','STRONG','I','EM','U','BR','DIV','SPAN'];
+  const clone = editor.cloneNode(true);
+
+  // Clean up spans/divs that are just wrappers from contenteditable
+  clone.querySelectorAll('*').forEach(el => {
+    if (!allowed.includes(el.tagName)) {
+      el.replaceWith(...el.childNodes);
+    } else {
+      // Remove all attributes except nothing (keep clean)
+      while (el.attributes.length > 0) el.removeAttribute(el.attributes[0].name);
+    }
+  });
+
+  return clone.innerHTML
+    .replace(/<div>/gi, '<p>').replace(/<\/div>/gi, '</p>')
+    .replace(/<span>/gi, '').replace(/<\/span>/gi, '')
+    .replace(/\s+/g,' ').trim();
+}
+
+/* ══════════════════════════════════════
+   SUBMIT
+══════════════════════════════════════ */
+async function submitPost() {
+  const username = currentUser;
+  const bodyHTML = getEditorHTML();
+  const bodyText = document.getElementById('editor').innerText.trim();
+
+  if (!username) { toast2('No username set.', 'err'); return; }
+  if (!bodyText) { toast2('Write something first.', 'err'); return; }
+  if (bodyText.length < 3) { toast2('Say a little more.', 'err'); return; }
+  if (bodyText.length > 2000) { toast2('Too long — keep under 2000 chars.', 'err'); return; }
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.classList.add('loading');
+
+  try {
+    const postId  = 'tb' + Date.now().toString(36) + Math.random().toString(36).slice(2,5);
+    const payload = new URLSearchParams({ action:'post', username, body: bodyHTML, postId });
+
+    const res  = await fetch(SCRIPT_URL, { method:'POST', body: payload });
+    const text = await res.text();
+    let data;
+    try { data = JSON.parse(text); } catch { data = { status:'error' }; }
+
+    if (data.status === 'ok') {
+      toast2('Posted. Your truth is out there. ✓', 'ok');
+      document.getElementById('editor').innerHTML = '';
+      document.getElementById('charCount').textContent = '0 / 2000';
+      loadPosts();
+    } else {
+      toast2('Error: ' + (data.message || 'unknown'), 'err');
+    }
+  } catch (e) {
+    toast2('Network error — check your Script URL.', 'err');
+  }
+
+  btn.disabled = false;
+  btn.classList.remove('loading');
+}
+
+/* ══════════════════════════════════════
+   LIKE / DISLIKE
+══════════════════════════════════════ */
+function getVotes() {
+  try { return JSON.parse(localStorage.getItem('tb_votes') || '{}'); } catch { return {}; }
+}
+function saveVotes(v) { localStorage.setItem('tb_votes', JSON.stringify(v)); }
+
+async function vote(postId, dir) {
+  const votes = getVotes();
+  if (votes[postId]) {
+    gToast('You already voted on this post.', 'red'); return;
+  }
+
+  // Optimistic UI
+  votes[postId] = dir;
+  saveVotes(votes);
+  updateVoteUI(postId, dir);
+
+  try {
+    const payload = new URLSearchParams({ action: 'vote', postId, dir });
+    const res  = await fetch(SCRIPT_URL, { method:'POST', body: payload });
+    const text = await res.text();
+    let data;
+    try { data = JSON.parse(text); } catch { data = { status:'error' }; }
+
+    if (data.status === 'ok') {
+      // Update count from server
+      const post = allPosts.find(p => p.postId === postId);
+      if (post && data.likes  !== undefined) post.likes    = data.likes;
+      if (post && data.dislikes !== undefined) post.dislikes = data.dislikes;
+      updateVoteCountUI(postId, data.likes, data.dislikes);
+    }
+  } catch (e) {
+    // Revert on error
+    delete votes[postId];
+    saveVotes(votes);
+    updateVoteUI(postId, null);
+    gToast('Vote failed — try again.', 'red');
+  }
+}
+
+function updateVoteUI(postId, dir) {
+  const card = document.getElementById('post-' + postId);
+  if (!card) return;
+  const lb = card.querySelector('.like-btn');
+  const db = card.querySelector('.dislike-btn');
+  if (lb) lb.classList.toggle('voted', dir === 'like');
+  if (db) db.classList.toggle('voted', dir === 'dislike');
+}
+
+function updateVoteCountUI(postId, likes, dislikes) {
+  const card = document.getElementById('post-' + postId);
+  if (!card) return;
+  const lc = card.querySelector('.like-count');
+  const dc = card.querySelector('.dislike-count');
+  if (lc && likes    !== undefined) lc.textContent = likes;
+  if (dc && dislikes !== undefined) dc.textContent = dislikes;
+}
+
+/* ══════════════════════════════════════
+   SHARE
+══════════════════════════════════════ */
+function sharePost(postId) {
+  const url = location.origin + location.pathname + '#post-' + postId;
+  navigator.clipboard.writeText(url).then(() => {
+    gToast('Link copied to clipboard! ✓', 'green');
+  }).catch(() => {
+    prompt('Copy this link:', url);
+  });
+}
+
+/* ══════════════════════════════════════
+   LOAD POSTS
+══════════════════════════════════════ */
+async function loadPosts() {
+  const btn = document.getElementById('refreshBtn');
+  btn.classList.add('spinning');
+
+  try {
+    const res  = await fetch(SCRIPT_URL + '?action=getPosts', { cache:'no-store' });
+    const data = await res.json();
+    allPosts   = data.posts || [];
+    renderFeed();
+  } catch (e) {
+    document.getElementById('feedList').innerHTML =
+      `<div class="feed-state">Could not load posts.<br/>Check SCRIPT_URL.</div>`;
+  }
+
+  btn.classList.remove('spinning');
+}
+
+function setSort(mode) {
+  sortMode = mode;
+  document.getElementById('sortNew').classList.toggle('active', mode==='new');
+  document.getElementById('sortTop').classList.toggle('active', mode==='top');
+  renderFeed();
+}
+
+function renderFeed() {
+  const list   = document.getElementById('feedList');
+  const label  = document.getElementById('postCountLabel');
+  const live   = document.getElementById('liveCount');
+  const votes  = getVotes();
+
+  let posts = [...allPosts];
+  if (sortMode === 'top') {
+    posts.sort((a,b) => ((+b.likes||0) - (+b.dislikes||0)) - ((+a.likes||0) - (+a.dislikes||0)));
+  }
+
+  const n = posts.length;
+  label.textContent = n ? `— ${n} post${n!==1?'s':''}` : '';
+  live.textContent  = n ? `${n} post${n!==1?'s':''}` : 'no posts yet';
+
+  if (!n) {
+    list.innerHTML = `<div class="feed-state">No posts yet — be the first.</div>`;
+    return;
+  }
+
+  list.innerHTML = posts.map((p, i) => {
+    const voted = votes[p.postId];
+    const likes    = parseInt(p.likes)    || 0;
+    const dislikes = parseInt(p.dislikes) || 0;
+    const initials = (p.username||'?').slice(0,1).toUpperCase();
+
+    return `
+    <article class="post-card" id="post-${esc(p.postId)}"
+      style="animation-delay:${Math.min(i,15)*0.03}s">
+      <div class="post-top">
+        <div class="post-avatar">${initials}</div>
+        <div class="post-meta-grp">
+          <div class="post-user">${esc(p.username)}</div>
+          <div class="post-time">${ago(p.timestamp)}</div>
+        </div>
+        <div class="post-actions-top">
+          <!-- Like -->
+          <button class="icon-btn like-btn ${voted==='like'?'voted':''}"
+            onclick="vote('${esc(p.postId)}','like')" title="Upvote">
+            <svg viewBox="0 0 16 16" fill="currentColor">
+              <path d="M8 2l2.5 4.5H13l-4 3.5 1.5 4.5L8 11.5 5.5 14.5 7 10 3 6.5h2.5z"/>
+            </svg>
+            <span class="like-count">${likes}</span>
+          </button>
+          <!-- Dislike -->
+          <button class="icon-btn dislike-btn ${voted==='dislike'?'voted':''}"
+            onclick="vote('${esc(p.postId)}','dislike')" title="Downvote">
+            <svg viewBox="0 0 16 16" fill="currentColor">
+              <path d="M8 14l-2.5-4.5H3l4-3.5-1.5-4.5L8 4.5l2.5-3L9 5.5l4-3.5h-2.5z"/>
+            </svg>
+            <span class="dislike-count">${dislikes}</span>
+          </button>
+          <!-- Share -->
+          <button class="icon-btn share-btn"
+            onclick="sharePost('${esc(p.postId)}')" title="Share this post">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="3" r="1.5"/><circle cx="4" cy="8" r="1.5"/>
+              <circle cx="12" cy="13" r="1.5"/>
+              <line x1="5.4" y1="7.2" x2="10.6" y2="4.2"/>
+              <line x1="5.4" y1="8.8" x2="10.6" y2="11.8"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="post-body">${sanitise(p.body)}</div>
+
+      <div class="post-footer">
+        <span class="post-id-tag"># ${esc(p.postId)}</span>
+      </div>
+    </article>`;
+  }).join('');
+
+  // Handle URL hash
+  handleHash();
+}
+
+/* ══════════════════════════════════════
+   URL HASH ROUTING
+══════════════════════════════════════ */
+function handleHash() {
+  const hash = location.hash;
+  if (!hash.startsWith('#post-')) return;
+  const postId = hash.slice(6);
+  const el = document.getElementById('post-' + postId);
+  if (!el) return;
+  setTimeout(() => {
+    el.scrollIntoView({ behavior:'smooth', block:'center' });
+    el.classList.add('highlighted');
+    setTimeout(() => el.classList.remove('highlighted'), 3500);
+  }, 350);
+}
+
+window.addEventListener('hashchange', handleHash);
+
+/* ══════════════════════════════════════
+   SANITISE HTML (for display)
+══════════════════════════════════════ */
+function sanitise(html) {
+  if (!html) return '';
+  // Only allow specific tags, strip everything else
+  return html
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[\s\S]*?<\/style>/gi, '')
+    .replace(/on\w+="[^"]*"/gi, '')
+    .replace(/on\w+='[^']*'/gi, '')
+    .replace(/javascript:/gi, '')
+    .replace(/<(?!\/?(?:h1|h2|b|strong|i|em|u|p|br)\b)[^>]*>/gi, '');
+}
+
+/* ══════════════════════════════════════
+   UTILITIES
+══════════════════════════════════════ */
+function esc(s) {
+  return String(s||'')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function ago(str) {
+  if (!str) return '—';
+  const d = new Date(str), now = new Date();
+  const s = Math.floor((now - d) / 1000);
+  if (s < 5)    return 'just now';
+  if (s < 60)   return `${s}s ago`;
+  if (s < 3600) return `${Math.floor(s/60)}m ago`;
+  if (s < 86400) return `${Math.floor(s/3600)}h ago`;
+  if (s < 604800) return `${Math.floor(s/86400)}d ago`;
+  return d.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+}
+
+// Compose panel toast
+function toast2(msg, type) {
+  const el = document.getElementById('composeToast');
+  el.textContent = msg;
+  el.className   = 'toast ' + (type==='ok'?'ok':'err');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.className = 'toast', 4500);
+}
+
+// Global bottom-right toast
+let gToastTimer;
+function gToast(msg, color) {
+  const el = document.getElementById('globalToast');
+  el.textContent = msg;
+  el.className   = 'show ' + (color||'');
+  clearTimeout(gToastTimer);
+  gToastTimer = setTimeout(() => el.className = '', 3000);
+}
+
+/* ══════════════════════════════════════
+   INIT
+══════════════════════════════════════ */
+initUsername();
+loadPosts();
+setInterval(loadPosts, 30000);
+</script>
+</body>
+</html>
